@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta charset="UTF-8">
+  <title>Books</title>
+  <th:block th:insert="component/bootstrap"></th:block>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
+  <link rel="stylesheet" href="/css/jquery.rateyo.css">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
+</head>
+<body style="background-color: #4B617C">
+<th:block th:insert="component/navbar"></th:block>
+<div class="container" style="margin-top: 100px">
+  <div class="row">
+    <div class="col-6">
+      <img style="margin: 0 auto; display: block" th:src="'/images/'+${book.id}+${book.image}" alt="" width="300" height="300">
+    </div>
+    <div class="col-6">
+      <h1 style="font-family: 'Merriweather', 'Georgia', serif;font-weight: bold" th:text="${book.title}"></h1>
+      <div id="bookRating" style="z-index: 0;" th:onload="'avgRating('+${avgRating}+')'"></div><span style="position: relative;
+                                                                                        top: -25px;
+                                                                                        left: 180px;">([[${#numbers.formatDecimal(avgRating,0,1,'POINT')}]])</span>
+      <h4 style="font-family: 'Merriweather', 'Georgia', serif;" th:text="${#numbers.formatCurrency(book.price)}"></h4>
+      <h6 style="font-family: 'Merriweather', 'Georgia', serif;" th:text="${book.description}"></h6>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <section>
+    <div class="container my-5 py-5">
+      <div class="row d-flex justify-content-center">
+        <div class="col-md-12 col-lg-10 col-xl-8">
+          <div class="card">
+            <div class="card-footer py-3 border-0">
+              <form action="/comment" method="post">
+              <div class="d-flex flex-start w-100">
+                <img class="rounded-circle shadow-1-strong me-3"
+                     src="/images/user.png" alt="avatar" width="40"
+                     height="40" />
+                <div class="form-outline w-100">
+                  <input type="hidden" th:value="${book.id}" name="bookId" >
+                  <input type="hidden" th:value="${#authentication.name}" name="userName">
+                  <input type="hidden" name="rating" class="rating">
+                  <label class="form-label" for="textAreaExample" >Review</label>
+                <textarea class="form-control" name="comment" id="textAreaExample" rows="4"
+                          style="background: #fff;resize: none"></textarea>
+                  <div><div id="rateYo"></div><span class="numberRate"></span></div>
+                </div>
+              </div>
+              <div class="float-end mt-2 pt-1" sec:authorize="isAuthenticated()">
+                <button type="submit" class="btn btn-primary btn-sm">Comment</button>
+              </div>
+                <div class="float-end mt-2 pt-1" sec:authorize="isAnonymous()">
+                  <a  href="/login" class="btn btn-primary btn-sm">Comment</a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="container">
+  <section>
+    <div class="container my-5 py-5">
+      <div class="row d-flex justify-content-center">
+        <div class="col-md-12 col-lg-10">
+          <div class="card text-dark">
+            <div class="card-body p-4">
+              <h4 class="mb-0">Recent comments</h4>
+              <p class="fw-light mb-4 pb-2">Latest Comments section by users</p>
+              <th:block  th:each="feedback : ${book.feedbacksById}">
+              <div class="d-flex flex-start mt-3">
+                <img class="rounded-circle shadow-1-strong me-3"
+                     src="/images/user.png"  alt="avatar" width="60"
+                     height="60" />
+                <div>
+                  <h6 class="fw-bold mb-1" th:text="${feedback.accountByAccountId.username}"></h6>
+                  <h6 class="fw-bold mb-1"><div th:class="rateYoComment+${feedback.id}" th:onload="'loadRating('+${feedback.rating}+','+${feedback.id}+')'"></div></h6>
+                  <div class="d-flex align-items-center mb-3">
+                    <p class="mb-0" th:text="${#dates.format(feedback.dateComment, 'dd-MMM-yyyy HH:mm')}">
+                    </p>
+                  </div>
+                  <p class="mb-0" th:text="${feedback.comment}">
+                  </p>
+                </div>
+              </div>
+              <hr class="my-0" style="height: 1px;" />
+            </th:block>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<th:block th:insert="component/jquery"></th:block>
+<script src="/js/jquery.rateyo.js"></script>
+<script>
+  $(function () {
+    $("#rateYo").rateYo({
+      onChange: function (rating, rateYoInstance) {
+        $('.rating').val(rating);
+        $('.numberRate').html("("+rating+")");
+      }
+    });
+    $('div[onload]').trigger('onload');
+  });
+
+ function loadRating(rate,id){
+   $(".rateYoComment"+id).rateYo({
+     rating:rate,
+     readOnly: true
+   });
+ }
+ function avgRating(rate){
+   $("#bookRating").rateYo({
+     rating:rate,
+     readOnly: true
+   });
+ }
+</script>
+</body>
+</html>

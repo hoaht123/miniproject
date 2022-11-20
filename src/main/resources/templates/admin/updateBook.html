@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Update book</title>
+  <th:block th:insert="component/bootstrap"></th:block>
+</head>
+<body>
+<th:block th:insert="component/navbar"></th:block>
+<div class="container">
+  <div class="row d-flex justify-content-center">
+    <div class="col-12">
+      <form th:action="@{'/Management/updateBook'}" method="post" th:object="${book}" enctype="multipart/form-data">
+        <h1 class="text-center">Update book</h1>
+        <div class="form-group">
+          <input type="hidden" class="form-control" th:value="${book.id}" th:field="*{id}">
+          <label>Title</label>
+          <input type="text" class="form-control" th:value="${book.title}" th:field="*{title}">
+        </div>
+        <div class="form-group">
+          <label>Price</label>
+          <input type="text" class="form-control"  th:value="${book.price}" th:field="*{price}"></div>
+        <div class="form-group">
+          <label>Image</label>
+          <input type="hidden" th:field="*{image}" th:value="${book.getImage()}">
+          <input type="file" class="form-control" name="imageBook" onchange="preview()" ></div>
+        <div class="d-flex justify-content-center">
+          <img style="width: 200px;
+                      height: 150px;
+                      margin-top: 30px;" id="blah" th:src="'/images/'+${book.id}+${book.image}" alt="your image" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="form-control"  th:field="*{description}"></textarea></div>
+        <div>
+          <div style="margin-top: 20px;"><input type="submit" value="Update" class="btn btn-primary"></div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  const frame = document.getElementById("blah")
+  function preview() {
+    frame.src=URL.createObjectURL(event.target.files[0]);
+  }
+</script>
+</body>
+</html>

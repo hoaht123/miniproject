@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Books</title>
+  <th:block th:insert="component/bootstrap"></th:block>
+</head>
+<body>
+<th:block th:insert="component/navbar"></th:block>
+<div class="container">
+  <div class="row d-flex justify-content-center">
+    <div class="col-12">
+      <h1 class="text-center">List of publishers</h1>
+      <a th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}" th:href="@{'/Management/createPublisher'}" class="btn btn-primary">(+) Create new publisher</a>
+      <table class="table table-striped table-bordered" style="margin-top: 20px">
+        <tr>
+          <td>Id</td>
+          <td>Username</td>
+          <td>ROLE</td>
+        </tr>
+        <tr th:each="publisher : ${list}">
+          <td th:text="${publisher.id}"></td>
+          <td th:text="${publisher.username}"></td>
+          <td th:text="${publisher.role}"></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

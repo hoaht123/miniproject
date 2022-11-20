@@ -1,0 +1,183 @@
+<html lang="en" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+      integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"/>
+<style>
+    a {
+        text-decoration: none;
+        color: black;
+    }
+
+    .input-search {
+        width: 90%;
+        border-radius: 40px 0 0 40px;
+        text-indent: 15px;
+    }
+
+    .fa-magnifying-glass {
+        margin-top: 5px;
+        margin-left: 5px;
+        cursor: pointer;
+    }
+
+    .icon-search {
+        border-radius: 0 40px 40px 0;
+        margin-left: -5px;
+    }
+
+    .resultSearch {
+        z-index: 1;
+        width: 470px;
+        height: 300px;
+        background-color: white;
+        position: absolute;
+        top: 60px;
+        left: 400px;
+        display: none;
+        overflow-y: scroll;
+        border-radius: 10px 10px 10px 10px;
+    }
+
+    .imgSearch {
+        display: block;
+        margin: 0 auto;
+        margin-top: 14px;
+    }
+
+    .titleSearch {
+        font-size: 17px;
+    }
+
+    #form-search {
+        display: flex;
+    }
+</style>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark p-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">MiniProject</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class=" collapse navbar-collapse" id="navbarNavDropdown">
+            <div class="m-auto d-flex justify-content-center">
+                <form id="form-search" action="/" method="get">
+                    <div style="width: 500px">
+                        <input type="text" autocomplete="off" class="input-search" name="keySearch"
+                               onfocus="enableSearch()" onkeyup="loadSearch()"
+                               placeholder="Type something to search ....">
+                        <button class="icon-search"><i class=" search fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                </form>
+            </div>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link mx-2 active" aria-current="page" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link mx-2" href="#">Books</a>
+                </li>
+                <li class="nav-item dropdown"
+                    th:if="${#authorization.expression('hasAnyAuthority(''ADMIN'',''PUBLISHER'')')}">
+                    <a class="nav-link mx-2 dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Management
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <li><a class="dropdown-item" th:href="@{'/Management/viewBooks'}">View all books</a></li>
+                        <li th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}"><a class="dropdown-item"
+                                                                                               th:href="@{'/Management/viewPublishers'}">View
+                            publishers</a></li>
+                        <li th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}"><a class="dropdown-item"
+                                                                                               th:href="@{'/Management/viewUsers'}">View
+                            user</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a sec:authorize="isAnonymous()" class="nav-link mx-2" href="/login">Login</a>
+                    <a sec:authorize="isAuthenticated()" class="nav-link mx-2" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="resultSearch">
+    <div class="container">
+
+    </div>
+</div>
+<th:block th:insert="component/jquery"></th:block>
+<script>
+    var input = document.querySelector(".input-search");
+    input.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            document.querySelector("#form-search").submit();
+        }
+    })
+    input.addEventListener("blur", function (e) {
+        e.preventDefault()
+        if ($('.input-search').val() !== "") {
+            $('.resultSearch').css("display", "none");
+        }
+    })
+    document.querySelector(".resultSearch").addEventListener("mousedown", function (e) {
+        e.preventDefault();
+    })
+
+    function enableSearch() {
+        if ($('.input-search').val() === "") {
+            $('.resultSearch').css("display", "none");
+        } else {
+            $('.resultSearch').css("display", "block");
+        }
+    }
+
+    function formatCurrencyVND(price) {
+        return new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(price);
+    }
+
+    function loadSearch() {
+        const resultSearch = $('.resultSearch');
+        const inputSearch = $('.input-search').val();
+        let output = "";
+        let array = []
+        if (inputSearch === "") {
+            resultSearch.css("display", "none");
+        } else {
+            $.ajax({
+                url: "/loadSearch",
+                dataType: "json",
+                type: "GET",
+                data: {keySearch: inputSearch},
+                success: (rs) => {
+                    if (rs == null) {
+                        $('.resultSearch').css("display", "none");
+                    } else {
+                        for (var book of rs) {
+                            resultSearch.css("display", "block");
+                            output = "<div class= \"row\" style=\"margin-top: 10px\">\n" +
+                                "   <div class=\"col-4\">\n" +
+                                "         <a href=\"/detailsBook/" + book.id + "\">" +
+                                "              <img class=\"imgSearch\" src=\"/images/" + book.id + book.image + "\" width=\"50\" height=\"50\">\n" +
+                                "         </a>\n" +
+                                "   </div>" +
+                                "   <div class=\"col-8\">" +
+                                "         <a href=\"/detailsBook/" + book.id + "\">\n" +
+                                "               <h3 class=\"titleSearch\">" + book.title + "</h3>\n" +
+                                "          </a>\n" +
+                                "               <p>" + formatCurrencyVND(book.price) + "</p>\n" +
+                                "    </div>\n" +
+                                " </div>";
+                            array.push(output)
+                        }
+                        resultSearch.html(array);
+                    }
+                }
+            })
+        }
+    }
+</script>
+</body>
+</html>

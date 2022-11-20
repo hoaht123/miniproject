@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <th:block th:insert="component/bootstrap"></th:block>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
+    <link rel="stylesheet" href="/css/jquery.rateyo.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
+</head>
+<body style="background-color: #4B617C">
+<th:block th:insert="component/navbar"></th:block>
+<div class="container">
+    <hr>
+    <p class="text-center text-light fs-2" style="font-style: italic">Library Book</p>
+    <hr>
+</div>
+<th:block th:if="${keySearch!=null}">
+    <h1 class="text-center">Không tìm thấy kết quả "[[${keySearch}]]"</h1>
+</th:block>
+<div class="container" style="margin-top: 50px;">
+    <div class="row">
+        <div class="col-3" th:each="b : ${books}" style="margin-top: 20px;margin-bottom: 10px">
+            <div class="card" style="height: 450px;">
+                <div class="image  py-3 px-3">
+                    <a th:href="@{'/detailsBook/'+${b.id}}">
+                        <img class="card-img-top" style="display: block;margin: 0 auto" th:src="'/images/'+${b.id}+${b.image}" width="250" height="250">
+                    </a>
+                </div>
+                <div class="card-body" style="height: 150px">
+                    <h5 class="card-title" style="height: 40px" th:text="${b.title}"></h5>
+                    <div th:id="avgRatingBook+${b.id}" th:onload="'avgRating('+${b.id}+','+${b.avgRating}+')'" ></div>
+                    <p class="card-text">Price : [[${#numbers.formatCurrency(b.price)}]]</p>
+                    <a th:href="@{'/detailsBook/'+${b.id}}" class="btn btn-primary">View</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:insert="component/jquery"></th:block>
+<script src="/js/jquery.rateyo.js"></script>
+<script>
+    $(function () {
+        $('div[onload]').trigger('onload');
+    });
+
+    function avgRating(id,rate){
+        $("#avgRatingBook"+id).rateYo({
+            rating:rate,
+            readOnly: true,
+            starWidth: "20px"
+        });
+    }
+</script>
+</body>
+</html>

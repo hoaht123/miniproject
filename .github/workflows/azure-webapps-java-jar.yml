@@ -70,10 +70,16 @@ jobs:
         with:
           name: java-app
 
+      - name: Login via Az module
+        uses: azure/login@v1
+        with:
+            creds: ${{secrets.AZURE_CREDENTIALS}}
+            enable-AzPSSession: true
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'springboot-miniproject'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_9b4e6418-b1c2-4f36-84b3-5dc3274ec528 }}
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_9b4e6418-b1c2-4f36-84b3-5dc3274ec528 }}
           package: '*.jar'
